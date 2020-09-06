@@ -119,19 +119,17 @@ def get_data(data_file, train, test):
     return [x_train, y_train, x_test, y_test]
 
 
-class AIExample:
-    """Réseau de neuronnes Perceptron multicouches."""
+class AIExampleNumpy:
+    """Réseau de neuronnes Perceptron multicouches avec numpy."""
 
-    def __init__(self, data, learningrate, train, test):
-        """ data_file = fichier des datas
+    def __init__(self, data, learningrate):
+        """ data = datas mis en forme
             learningrate = coeff important
         """
 
         self.learningrate = learningrate
 
         # Les datas
-        self.train = train
-        self.test = test
         [self.x_train, self.y_train, self.x_test, self.y_test] = data
 
         # Réseau de neurones: colonne 16 en entrée, 2 nodes de 100, sortie de 26 caractères
@@ -140,11 +138,7 @@ class AIExample:
         self.activations = [relu, relu, sigmoid]
 
     def training(self):
-        """Apprentissage avec 14 000 lignes
-        Poids enregistré dans weights.npy
-        """
-
-        # #print("Training...")
+        """Apprentissage avec 16 000 lignes"""
 
         # Matrice diagonale de 1
         diagonale = np.eye(26, 26)
@@ -243,7 +237,7 @@ if __name__ == "__main__":
     for k in range(100):
         learningrate = 0.0200 + (k * 0.00005)
 
-        aie = AIExample(data, learningrate, train, test)
+        aie = AIExampleNumpy(data, learningrate)
 
         weight_list = aie.training()
         resp = aie.testing(weight_list)
