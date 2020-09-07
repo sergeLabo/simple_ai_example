@@ -123,46 +123,42 @@ def get_data(data_file, train, test):
 class AIExampleCupy:
     """Réseau de neuronnes Perceptron multicouches avec cupy."""
 
-    def __init__(self, data, learningrate):
-        """ data_file = fichier des datas
-            learningrate = coeff important
-        """
-
-        self.learningrate = learningrate
+    def __init__(self, data):
 
         # Les datas pour cupy, elles sont chargées en RAM GPU
         self.x_train = cp.array(data[0])
         self.y_train = cp.array(data[1])
         self.x_test = cp.array(data[2])
         self.y_test = cp.array(data[3])
-        print(type(self.x_train))
-        a = "Training: Shot {} Lettre {}; Testing: Shot {} Lettre {}"
-        print(a.format( len(self.x_train), len(self.y_train),
-                        len(self.x_test),  len(self.y_test)))
+
+        # #a = "Training: Shot {} Lettre {}; Testing: Shot {} Lettre {}"
+        # #print(a.format( len(self.x_train), len(self.y_train),
+                        # #len(self.x_test),  len(self.y_test)))
+
+        # Matrice self.diagonale de 1
+        self.diagonale = cp.eye(26, 26)
 
         # Réseau de neurones: colonne 16 en entrée, 2 nodes de 100, sortie de 26 caractères
         self.layers = [16, 100, 100, 26]
         # Fonction d'activation: imite l'activation d'un neuronne
         self.activations = [relu, relu, sigmoid]
-
-    def training(self):
-        """Apprentissage avec 16 000 lignes"""
-
-        # Matrice diagonale de 1
-        diagonale = cp.eye(26, 26)
-
         # globals() Return a dictionary representing the current global symbol table.
         self.activations_prime = [globals()[fonction.__name__ + '_prime'] \
                                             for fonction in self.activations]
-
-        node_dict = {}
 
         # Liste des poids
         # Initialisation des poids des nodes, pour ne pas à être à 0
         # Construit 3 matrices (100x1600, 100x100, 27x100)
         # /cp.sqrt() résultat expérimental de l'initialisation de Xavier Glorot et He
-        weight_list = [cp.random.randn(self.layers[k+1], self.layers[k]) / \
+        self.weight_init = [cp.random.randn(self.layers[k+1], self.layers[k]) / \
                        cp.sqrt(self.layers[k]) for k in range(len(self.layers)-1)]
+
+    def training(self, learningrate):
+        """Apprentissage avec 16 000 lignes"""
+
+        node_dict = {}
+        # Retour à la matrice initiale
+        weight_list = self.weight_init
 
         # vecteur_ligne = image en ligne à la 1ère itération
         # nombre_lettre = nombre correspondant à la lettre de l'image
@@ -173,7 +169,7 @@ class AIExampleCupy:
             vecteur_colonne = cp.array(vecteur_ligne, ndmin=2).T
 
             # IndexError: arrays used as indices must be of integer or boolean type.
-            # (actual: <class 'numpy.object_'>) in diagonale[:,[nombre_lettre]]
+            # (actual: <class 'numpy.object_'>) in self.diagonale[:,[nombre_lettre]]
             nombre_lettre = int(nombre_lettre)
 
             # Forward propagation
@@ -190,7 +186,7 @@ class AIExampleCupy:
                 node_dict[k+1] = vecteur_colonne
 
             # Retro propagation, delta_a = écart entre la sortie réelle et attendue
-            delta_a = vecteur_colonne - diagonale[:,[nombre_lettre]]
+            delta_a = vecteur_colonne - self.diagonale[:,[nombre_lettre]]
 
             # Parcours des nodes en sens inverse pour corriger proportionnellement
             # les poids en fonction de l'erreur par rapport à la valeur souhaitée
@@ -200,7 +196,7 @@ class AIExampleCupy:
                 delta_w = cp.dot(delta_z, node_dict[k].T)
                 delta_a = cp.dot(weight_list[k].T, delta_z)
                 # Pour converger vers le minimum d'erreur
-                weight_list[k] -= self.learningrate * delta_w
+                weight_list[k] -= learningrate * delta_w
 
         return weight_list
 
@@ -248,17 +244,18 @@ if __name__ == "__main__":
     # 0.0222  # meilleur résultat
     t = time()
     result = []
-    for k in range(100):
-        learningrate = 0.0200 + (k * 0.00005)
 
-        aie = AIExampleCupy(data, learningrate)
+    for j in range(10):
+        aie = AIExampleCupy(data)
+        for k in range(10):
+            learningrate = 0.021 + (k * 0.0005)
 
-        weight_list = aie.training()
-        resp = aie.testing(weight_list)
-        result.append([learningrate, resp])
+            weight_list = aie.training(learningrate)
+            resp = aie.testing(weight_list)
+            result.append([learningrate, resp])
 
-        print(f"Learningrate: {learningrate} Résultat {round(resp, 2)} %")
+            print(f"Learningrate: {learningrate} Résultat {round(resp, 2)} %")
+
     print("Temps de calcul par cycle:", round((time()-t)/100, 2), "s")
-
     best = sorted(result, key=operator.itemgetter(1), reverse=True)
     print(f"Meilleur résultat: learningrate={best[0][0]} efficacité={best[0][1]}")
