@@ -122,39 +122,38 @@ def get_data(data_file, train, test):
 class AIExampleNumpy:
     """Réseau de neuronnes Perceptron multicouches avec numpy."""
 
-    def __init__(self, data, learningrate):
-        """ data = datas mis en forme
-            learningrate = coeff important
-        """
+    def __init__(self, data):
 
-        self.learningrate = learningrate
-
+        print("Création de l'objet ...")
         # Les datas
         [self.x_train, self.y_train, self.x_test, self.y_test] = data
 
         # Réseau de neurones: colonne 16 en entrée, 2 nodes de 100, sortie de 26 caractères
         self.layers = [16, 100, 100, 26]
+
         # Fonction d'activation: imite l'activation d'un neuronne
         self.activations = [relu, relu, sigmoid]
 
-    def training(self):
-        """Apprentissage avec 16 000 lignes"""
-
-        # Matrice diagonale de 1
-        diagonale = np.eye(26, 26)
+        # Matrice self.diagonale de 1
+        self.diagonale = np.eye(26, 26)
 
         # globals() Return a dictionary representing the current global symbol table.
         self.activations_prime = [globals()[fonction.__name__ + '_prime'] \
                                             for fonction in self.activations]
 
-        node_dict = {}
-
         # Liste des poids
         # Initialisation des poids des nodes, pour ne pas à être à 0
         # Construit 3 matrices (100x16, 100x100, 26x100)
         # /np.sqrt() résultat expérimental de l'initialisation de Xavier Glorot et He
-        weight_list = [np.random.randn(self.layers[k+1], self.layers[k]) / \
+        self.weight_init = [np.random.randn(self.layers[k+1], self.layers[k]) / \
                        np.sqrt(self.layers[k]) for k in range(len(self.layers)-1)]
+
+    def training(self, learningrate):
+        """Apprentissage avec 16 000 lignes"""
+
+        node_dict = {}
+        # Récupération des poids initiaux
+        weight_list = self.weight_init
 
         # vecteur_ligne = image en ligne à la 1ère itération
         # nombre_lettre = nombre correspondant à la lettre de l'image
@@ -178,7 +177,7 @@ class AIExampleNumpy:
                 node_dict[k+1] = vecteur_colonne
 
             # Retro propagation, delta_a = écart entre la sortie réelle et attendue
-            delta_a = vecteur_colonne - diagonale[:,[nombre_lettre]]
+            delta_a = vecteur_colonne - self.diagonale[:,[nombre_lettre]]
             # Parcours des nodes en sens inverse pour corriger proportionnellemnt
             # les poids en fonction de l'erreur par rapport à la valeur souhaitée
             # Descente du Gradient stochastique
@@ -187,14 +186,13 @@ class AIExampleNumpy:
                 delta_w = np.dot(delta_z, node_dict[k].T)
                 delta_a = np.dot(weight_list[k].T, delta_z)
                 # Pour converger vers le minimum d'erreur
-                weight_list[k] -= self.learningrate * delta_w
+                weight_list[k] -= learningrate * delta_w
 
         return weight_list
 
     def testing(self, weight_list):
         """Teste avec les images de testing, retourne le ratio de bon résultats"""
 
-        # #print("Testing...")
         # Nombre de bonnes reconnaissance
         success = 0
 
@@ -223,8 +221,8 @@ if __name__ == "__main__":
     test = 4000
     data = get_data(data_file, train, test)
     print(f"Get data done. {data[0].shape, data[1].shape, data[2].shape, data[3].shape}")
-    for i in range(10):
-        print(f"Train Value {i} = {data[0][i]}")
+    for i in range(3):
+        print(f"\nTrain Value {i} = {data[0][i]}")
         print(f"Train Label {i} = {data[1][i]}")
         print(f"Test Value {i} = {data[2][i]}")
         print(f"Test Label {i} = {data[3][i]}")
@@ -234,17 +232,19 @@ if __name__ == "__main__":
     # 0.0222  # meilleur résultat
     t = time()
     result = []
-    for k in range(100):
-        learningrate = 0.0200 + (k * 0.00005)
+    print()
+    for j in range(10):
+        print(f"Initialisation {j}:")
+        aie = AIExampleNumpy(data)
+        for k in range(10):
+            learningrate = 0.021 + (k * 0.0005)
+            weight_list = aie.training(learningrate)
+            resp = aie.testing(weight_list)
+            result.append([learningrate, resp])
 
-        aie = AIExampleNumpy(data, learningrate)
+            print(f"    {k}: Learningrate: {round(learningrate, 4)} Résultat {round(resp, 2)} %")
+        print()
 
-        weight_list = aie.training()
-        resp = aie.testing(weight_list)
-        result.append([learningrate, resp])
-
-        print(f"Learningrate: {learningrate} Résultat {round(resp, 2)} %")
     print("Temps de calcul par cycle:", round((time()-t)/100, 2), "s")
-
     best = sorted(result, key=operator.itemgetter(1), reverse=True)
-    print(f"Meilleur résultat: learningrate={best[0][0]} efficacité={best[0][1]}")
+    print(f"Meilleur résultat: learningrate = {best[0][0]} efficacité = {round(best[0][1], 4)}")
