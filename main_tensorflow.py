@@ -85,8 +85,8 @@ def get_data(data_file, train, test):
     # Création des arrays
     x_train = np.zeros((train, 16), dtype=np.uint8)
     x_test = np.zeros((test, 16), dtype=np.uint8)
-    y_train = np.zeros((train, 1), dtype=np.uint8)
-    y_test = np.zeros((test, 1), dtype=np.uint8)
+    y_train = np.zeros((train), dtype=np.uint8)
+    y_test = np.zeros((test), dtype=np.uint8)
 
     # Remplissage des arrays
     i = 0
