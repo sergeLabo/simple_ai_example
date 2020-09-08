@@ -41,6 +41,7 @@ def main(data):
     [train_images, train_labels, test_images, test_labels] = data
     class_names = get_class_names()
 
+    t = time()
     # Construire le réseau de neuronnes nécessite de configurer les couches du
     # modèle et ensuite de le compiler.
     model = build_the_model()
@@ -48,11 +49,18 @@ def main(data):
 
     # Apprentissage
     model = training_the_model(model, train_images, train_labels, epochs)
+    temps = round(time() - t, 1)
 
     # Test de l'efficacité
     test_loss, test_acc = model.evaluate(test_images, test_labels)
     print(f"\nTesting ......    ")
     print(f"Efficacité sur les tests: {round(test_acc*100, 2)} %")
+
+    # Quelques tests
+    print(f"\nQuelques test ...")
+    testing_the_model(model, test_images, test_labels)
+
+    print(f"\nApprentissage en {temps} secondes")
 
 
 def get_data(data_file, train, test):
@@ -199,12 +207,64 @@ def training_the_model(model, train_images, train_labels, epochs):
     return model
 
 
+def testing_the_model(model, test_images, test_labels):
+    """It turns out that the accuracy on the test dataset is a little less than the
+    accuracy on the training dataset. This gap between training accuracy and test
+    accuracy represents *overfitting*. Overfitting is when a machine learning model
+    performs worse on new, previously unseen inputs than on the training data.
+
+    Make predictions
+        With the model trained, you can use it to make predictions about some images.
+    """
+    predictions = model.predict(test_images)
+
+    """
+    Here, the model has predicted the label for each image in the testing set.
+    Let's take a look at the first prediction:
+    """
+
+    L = get_class_names()
+    print(f"Test sur la 13 ème imagede test: label = {test_labels[13]} soit {L[13]}")
+    print(f"    {test_images[13]}")
+    print(f"L'indice 13 correspond à la 16014 ème ligne soit L, soit 4,9,4,6,2,0,2,4,6,1,0,7,0,8,0,8 !")
+
+    """
+    A prediction is an array of 27 numbers. They represent the model's "confidence"
+    that the image corresponds to each of the 27 different objects.
+    You can see which label has the highest confidence value:
+    """
+
+    print(f"\nPrédiction ...")
+    pred = np.argmax(predictions[13])
+
+    print(f"    Prédiction de la 13 ème image: {pred} soit {L[pred]}")
+
+    """
+    Finally, use the trained model to make a prediction about a single image.
+
+    `model.predict` returns a list of lists—one list for each image in the batch of data. Grab the predictions for our (only) image in the batch
+
+    # `tf.keras` models are optimized to make predictions on a *batch*, or collection, of examples at once. Accordingly, even though you're using a single image, you need to add it to a list
+
+    """
+
+    print("\nTest sur 10 images")
+    for i in range(100):
+        img = test_images[2*i]
+        # Add the image to a batch where it's the only member.
+        img = (np.expand_dims(img, 0))
+
+        # Now predict the correct label for this image
+        # Retourne une liste de 27 prédictions
+        predictions_single = model.predict(img)
+        print("Image: {} Prédiction {}".format( test_labels[2*i],
+                                                np.argmax(predictions_single[0])))
+
+
 if __name__ == "__main__":
 
     data_file = './letter-recognition.data'
     train = 16000
     test = 4000
     data = get_data(data_file, train, test)
-    t = time()
     main(data)
-    print(f"\nCalcul en {round(time() - t, 1)} secondes")
