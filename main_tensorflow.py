@@ -27,7 +27,7 @@ Exemple construit sur documentation tensorflow:
     https://www.tensorflow.org/tutorials/keras/classification
 """
 
-epochs = 5
+epochs = 10
 
 
 CHARS_DICT = {  "A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7,
@@ -113,7 +113,6 @@ def get_data(data_file, train, test):
             yte.append(CHARS_DICT[v[0]])
         i += 1
 
-
     x_train = np.array(xtr)
     y_train = np.array(ytr)
     x_test  = np.array(xte)
@@ -121,6 +120,7 @@ def get_data(data_file, train, test):
     print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
     # (16000, 16) (16000,) (4000, 16) (4000,)
 
+    # Keras veut un array de shape 3 avec GPU! car c'est censé être des images
     x_train = np.expand_dims(x_train, axis=2)
     x_test  = np.expand_dims(x_test, axis=2)
     print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
