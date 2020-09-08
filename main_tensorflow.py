@@ -91,7 +91,7 @@ def get_data(data_file, train, test):
         n += 1
 
     # Création des arrays np.zeros((train, 16), dtype=np.uint8)
-    x_train, x_test, y_train, y_test = [],[], [],[]
+    xtr, ytr, xte, yte = [],[], [],[]
 
     # Remplissage des arrays
     i = 0
@@ -100,17 +100,31 @@ def get_data(data_file, train, test):
         # Conversion de la lettre en nombre entier = numéro de l'objet
         label = CHARS_DICT[v[0]]
 
-        # Les valeurs de la lettre
-        values = v[1]
-
         # Insertion par lignes
         if i < train:
-            x_train.append(values)
-            y_train.append(label)
+            # les 16 entiers caractérisants la lettre
+            xtr.append(v[1])
+            # Le numéro de la lettre
+            ytr.append(CHARS_DICT[v[0]])
         else:
-            x_test.append(v[1])
-            y_test.append(label)
+            # les 16 entiers caractérisants la lettre
+            xte.append(v[1])
+            # Le numéro de la lettre
+            yte.append(CHARS_DICT[v[0]])
         i += 1
+
+
+    x_train = np.array(xtr)
+    y_train = np.array(ytr)
+    x_test  = np.array(xte)
+    y_test  = np.array(yte)
+    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+    # (16000, 16) (16000,) (4000, 16) (4000,)
+
+    x_train = np.array(xtr).reshape((16000, 16))
+    y_train = np.array(ytr).reshape((16000, 1))
+    x_test  = np.array(xte).reshape((4000, 16))
+    y_test  = np.array(yte).reshape((4000, 1))
 
     return [x_train, y_train, x_test, y_test]
 
