@@ -121,10 +121,10 @@ def get_data(data_file, train, test):
     print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
     # (16000, 16) (16000,) (4000, 16) (4000,)
 
-    x_train = np.array(xtr).reshape((16000, 16))
-    y_train = np.array(ytr).reshape((16000, 1))
-    x_test  = np.array(xte).reshape((4000, 16))
-    y_test  = np.array(yte).reshape((4000, 1))
+    x_train = np.expand_dims(x_train, axis=2)
+    x_test  = np.expand_dims(x_test, axis=2)
+    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+    # (16000, 16, 1) (16000,) (4000, 16, 1) (4000,)
 
     return [x_train, y_train, x_test, y_test]
 
