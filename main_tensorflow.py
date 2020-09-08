@@ -90,11 +90,8 @@ def get_data(data_file, train, test):
             data[n][1].append(int(d[i]))
         n += 1
 
-    # Création des arrays
-    x_train = np.zeros((train, 16), dtype=np.uint8)
-    x_test = np.zeros((test, 16), dtype=np.uint8)
-    y_train = np.zeros((train), dtype=np.uint8)
-    y_test = np.zeros((test), dtype=np.uint8)
+    # Création des arrays np.zeros((train, 16), dtype=np.uint8)
+    x_train, x_test, y_train, y_test = [],[], [],[]
 
     # Remplissage des arrays
     i = 0
@@ -108,11 +105,11 @@ def get_data(data_file, train, test):
 
         # Insertion par lignes
         if i < train:
-            x_train[i] = values
-            y_train[i] =  label
+            x_train.append(values)
+            y_train.append(label)
         else:
-            x_test[i - train] =  v[1]
-            y_test[i - train] =  label
+            x_test.append(v[1])
+            y_test.append(label)
         i += 1
 
     return [x_train, y_train, x_test, y_test]
