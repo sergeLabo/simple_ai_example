@@ -27,7 +27,7 @@ Exemple construit sur documentation tensorflow:
     https://www.tensorflow.org/tutorials/keras/classification
 """
 
-epochs = 50
+epochs = 5
 
 
 CHARS_DICT = {  "A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6, "H": 7,
@@ -51,7 +51,8 @@ def main(data):
 
     # Test de l'efficacité
     test_loss, test_acc = model.evaluate(test_images, test_labels)
-    print("\nTesting ......    \nEfficacité sur les tests:", round(test_acc, 4))
+    print(f"\nTesting ......    ")
+    print(f"Efficacité sur les tests: {round(test_acc*100, 2)} %")
 
 
 def get_data(data_file, train, test):
@@ -84,8 +85,8 @@ def get_data(data_file, train, test):
     # Création des arrays
     x_train = np.zeros((train, 16), dtype=np.uint8)
     x_test = np.zeros((test, 16), dtype=np.uint8)
-    y_train = np.zeros((train), dtype=np.uint8)
-    y_test = np.zeros((test), dtype=np.uint8)
+    y_train = np.zeros((train, 1), dtype=np.uint8)
+    y_test = np.zeros((test, 1), dtype=np.uint8)
 
     # Remplissage des arrays
     i = 0
@@ -206,4 +207,4 @@ if __name__ == "__main__":
     data = get_data(data_file, train, test)
     t = time()
     main(data)
-    print(f"Calcul en {round(time() - t, 1)} secondes")
+    print(f"\nCalcul en {round(time() - t, 1)} secondes")
