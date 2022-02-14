@@ -117,14 +117,6 @@ def get_data(data_file, train, test):
     y_train = np.array(ytr)
     x_test  = np.array(xte)
     y_test  = np.array(yte)
-    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
-    # (16000, 16) (16000,) (4000, 16) (4000,)
-
-    # ## Keras veut un array de shape 3 avec GPU! car c'est censé être des images
-    # #x_train = np.expand_dims(x_train, axis=2)
-    # #x_test  = np.expand_dims(x_test, axis=2)
-    # #print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
-    # ## (16000, 16, 1) (16000,) (4000, 16, 1) (4000,)
 
     return [x_train, y_train, x_test, y_test]
 
@@ -167,7 +159,7 @@ def build_the_model():
 
     print("\nBuild the model ...")
     # Flatten transforme les images en vecteur colonne/ligne
-    model = keras.Sequential([  keras.layers.Input(shape=(16,)),  #Dense(input_shape=(16, 1)),
+    model = keras.Sequential([  keras.layers.Input(shape=(16,)),
                                 keras.layers.Dense(128, activation='relu'),
                                 keras.layers.Dense(26, activation='softmax') ])
     return model
